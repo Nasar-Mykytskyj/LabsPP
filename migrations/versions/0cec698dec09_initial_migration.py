@@ -31,7 +31,7 @@ def upgrade():
     sa.Column('username', sa.VARCHAR(length=45), autoincrement=False, nullable=True),
     sa.Column('first_name', sa.VARCHAR(length=45), autoincrement=False, nullable=True),
     sa.Column('email', sa.VARCHAR(length=45), autoincrement=False, nullable=True),
-    sa.Column('password', sa.VARCHAR(length=45), autoincrement=False, nullable=True),
+    sa.Column('password', sa.VARCHAR(length=255), autoincrement=False, nullable=True),
     sa.Column('phone', sa.VARCHAR(length=45), autoincrement=False, nullable=True),
     sa.PrimaryKeyConstraint('id', name='users_pkey'),
     postgresql_ignore_search_path=False

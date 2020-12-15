@@ -109,6 +109,7 @@ def add_user():
             return "problem with database", 404
     return "registered"
 @app.route('/user/<username>', methods=['GET'])
+@auth.login_required(role=['user','admin'])
 def get_user_by_name(username):
     try:
         user = models.User.query.filter_by(username=username).first()
@@ -127,6 +128,7 @@ def get_user_by_name(username):
     "photo_url":str,
     "description":str
 })
+@auth.login_required(role=['admin'])
 def add_med():
     try:
         req_data = request.get_json()
@@ -147,6 +149,7 @@ def add_med():
 
     return "added" ,200
 @app.route('/medicine', methods=['PUT'])
+@auth.login_required(role=['admin'])
 def update_medicine():
     try:
         req_data = request.get_json()
@@ -166,6 +169,7 @@ def update_medicine():
 
 
 @app.route('/medicine/<medicineId>', methods=['GET'])
+
 def get_medicine_by_id(medicineId):
     try:
         med = models.Med.query.filter_by(id=medicineId).first()
@@ -190,6 +194,7 @@ def delete_medicine_by_id(medicineId):
 
 
 @app.route('/store/order', methods=['POST','GET'])
+@auth.login_required(role=['user','admin'])
 @required_params({
     "user_id":int,
     "medicine_id":int
@@ -239,11 +244,12 @@ def verify_password(username, password):
             check_password_hash(user.password, password):
         return username
 
-@app.route('/')
-@auth.login_required(role=['user'])
+@app.route('/user/login')
+@auth.login_required(role=['user','admin'])
 def index():
     return "Hello, %s!" % auth.current_user()
 @app.route('/logout')
+@auth.login_required(role=['user','admin'])
 def logout():
 
     return redirect("http://none:none@127.0.0.1:5000")

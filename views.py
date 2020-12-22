@@ -1,11 +1,11 @@
 from datetime import datetime
 
 from flask import request, jsonify, flash, redirect, url_for, g
-from flask_login import login_user, login_required, logout_user
+
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app import app, login_manager, auth
-import models
+from app import app, auth, db, User, Med, Order
+
 from functools import wraps
 def required_params(required):
 
@@ -60,25 +60,20 @@ def required_params(required):
         return wrapper
 
     return decorator
-@login_manager.user_loader
-def load_user(user_id):
-    return models.db.session.query(models.User).get(user_id)
 
 
-@app.route('/user/<username>', methods=['DELETE'])
+
+@app.route('/user/<id>', methods=['DELETE'])
 @auth.login_required(role=['admin'])
-def delete_user_form(username):
+def delete_user_form(id):
     try:
-        user=models.User.query.filter_by(username=username).first()
-        if user is None:
-            return "user,not found",404
-        else:
-            models.db.session.commit(user)
-            models.db.session.commit()
-    except Exception :
-        models.db.session.rollback()
-        return "invalid username",400
-    return "deleted",200
+        User.query.filter_by(id = id).delete()
+        db.session.commit()
+        return "deleted", 200
+
+    except Exception:
+        db.session.rollback()
+        return "invalid user id", 400
 
 @app.route('/user', methods=['POST']) #GET requests will be blocked
 @required_params({
@@ -86,7 +81,8 @@ def delete_user_form(username):
     "first_name":str,
     "email":str,
     "password":str,
-    "phone":str
+    "phone":str,
+    "roles":str
 })
 def add_user():
     req_data = request.get_json()
@@ -96,23 +92,24 @@ def add_user():
     email = req_data['email']#two keys are needed because of the nested object
     password = req_data['password'] #an index is needed because of the array
     phone = req_data['phone']
-    user = models.User.query.filter_by(username=username).first()
+    roles=req_data['roles']
+    user = User.query.filter_by(username=username).first()
     if user:
         return "this user already registered"
     else:
-        user =models.User(username,first_name,email,generate_password_hash(password),phone)
+        user =User(username,first_name,email,generate_password_hash(password),phone,roles)
         try:
-            models.db.session.add(user)
-            models.db.session.commit()
+            db.session.add(user)
+            db.session.commit()
         except Exception:
-            models.db.session.rollback()
+            db.session.rollback()
             return "problem with database", 404
     return "registered"
 @app.route('/user/<username>', methods=['GET'])
 @auth.login_required(role=['user','admin'])
 def get_user_by_name(username):
     try:
-        user = models.User.query.filter_by(username=username).first()
+        user =User.query.filter_by(username=username).first()
         if user is None:
             return "user not found",404
         return jsonify(user.id,user.first_name,user.phone,user.email),200
@@ -127,22 +124,23 @@ def get_user_by_name(username):
     "number":int,
     "photo_url":str,
     "description":str
+
 })
 @auth.login_required(role=['admin'])
 def add_med():
     try:
         req_data = request.get_json()
-        med=models.Med.query.filter_by(name=req_data['name']).first()
+        med=Med.query.filter_by(name=req_data['name']).first()
         if med:
             return "this med already registered"
         else:
 
-            med = models.Med(**req_data)
+            med = Med(**req_data)
             try:
-                models.db.session.add(med)
-                models.db.session.commit()
+                db.session.add(med)
+                db.session.commit()
             except Exception:
-                models.db.session.rollback()
+                db.session.rollback()
                 return "problem with database", 404
     except Exception:
         return "invalid data",400
@@ -153,14 +151,14 @@ def add_med():
 def update_medicine():
     try:
         req_data = request.get_json()
-        med = models.Med.query.filter_by(id=req_data['id']).first()
+        med = Med.query.filter_by(id=req_data['id']).first()
         if med is None:
             return "med not found", 404
         try:
-            models.Med.query.filter_by(id=req_data['id']).update(dict(req_data['data']))
-            models.db.session.commit()
+            Med.query.filter_by(id=req_data['id']).update(dict(req_data['data']))
+            db.session.commit()
         except Exception:
-            models.db.session.rollback()
+            db.session.rollback()
             return "invalid data",400
         return "updated",200
     except Exception:
@@ -172,10 +170,10 @@ def update_medicine():
 
 def get_medicine_by_id(medicineId):
     try:
-        med = models.Med.query.filter_by(id=medicineId).first()
+        med = Med.query.filter_by(id=medicineId).first()
         if med is None:
             return "med not found",404
-        return jsonify(med),200
+        return jsonify(med.name,med.price,med.number,med.description),200
 
     except Exception:
         return "invalid medicine id",400
@@ -184,12 +182,12 @@ def get_medicine_by_id(medicineId):
 @auth.login_required(role=['admin'])
 def delete_medicine_by_id(medicineId):
     try:
-        models.Med.query.filter(models.Med.id==medicineId).delete()
-        models.db.session.commit()
+        Med.query.filter(Med.id==medicineId).delete()
+        db.session.commit()
         return "deleted",200
 
     except Exception:
-        models.db.session.rollback()
+        db.session.rollback()
         return "invalid medicine id", 400
 
 
@@ -203,11 +201,11 @@ def add_order():
     try:
         req_data = request.get_json()
         try:
-            order=models.Order(**req_data,ship_date=datetime.today())
-            models.db.session.add(order)
-            models.db.session.commit()
+            order=Order(**req_data,ship_date=datetime.today())
+            db.session.add(order)
+            db.session.commit()
         except Exception:
-            models.db.session.rollback()
+            db.session.rollback()
             return "problem with database", 404
         return "added order",200
     except Exception:
@@ -234,12 +232,12 @@ def login():
 """""
 @auth.get_user_roles
 def get_user_roles(aut_user):
-    user = models.User.query.filter_by(username=aut_user).first()
+    user = User.query.filter_by(username=aut_user).first()
     return user.roles
 
 @auth.verify_password
 def verify_password(username, password):
-    user = models.User.query.filter_by(username=username).first()
+    user = User.query.filter_by(username=username).first()
     if user and \
             check_password_hash(user.password, password):
         return username
@@ -254,8 +252,6 @@ def logout():
 
     return redirect("http://none:none@127.0.0.1:5000")
 
-if __name__ == '__main__':
-    app.run()
 
 
 

@@ -1,0 +1,3 @@
+[run]
+source = app,views
+omit = *alembic*, *.idea*, *poetry*,*htmlcov*

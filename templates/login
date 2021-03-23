@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <link rel="shortcut icon" href="" />
+        <title>Login</title>
+
+        <link rel="stylesheet" type="text/css" href="../static/login.css">
+    </head>
+<div class="header">
+        <div class="container">
+            <div class="header__inner">
+            <div class="logotyp">.Med</div>
+            <nav class="navigation">
+                 <a class="linka" href="https://www.linkconsulting.com/about-link/">About</a>
+                 <a class="linka" href="https://www.work.ua/">Service</a>
+
+                 <a class="linka" href="http://khovansky.info/blog/">Blog</a>
+                 <a class="linka" href="https://www.contact-sys.com/">Contact</a>
+
+            </nav>
+            </div>
+
+        </div>
+
+</div>
+<form action="/login" method="POST">
+    <div class='login'>
+        <div class ='login_screen'>
+            <div class='login_form'>
+                <h1 class="login_label">Login</h1>
+                <div class='login_container'>
+                    <label >Username</label>
+                    <div class='login_data'>
+                        <input name="text" placeholder="username" >
+                    </div>
+                    <label>Password</label>
+                    <div class='login_data'>
+                        <input name="password" placeholder="password">
+                    </div>
+                    <div class="forgot_password"> <a class="linka" href="http://khovansky.info/blog/">Forgot password?</a></div>
+                    <div class='login_data'>
+                        <input type="submit" class="btn" value="Log in">
+                    </div>
+                    <a class="linka" id="sign_link" href="http://khovansky.info/blog/">
+                        <div class="sign_btn" ><p>Sign up</p></div>
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</form>
+</html>

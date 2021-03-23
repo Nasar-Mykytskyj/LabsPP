@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <link rel="shortcut icon" href="" />
+        <title>Shop</title>
+
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+        <link rel="stylesheet" type="text/css" href="../static/shop.css">
+    </head>
+<body>
+<div class="header">
+        <div class="container">
+            <div class="header__inner">
+            <div class="logotyp">.Med</div>
+            <nav class="navigation">
+                 <a class="linka" href="https://www.linkconsulting.com/about-link/">About</a>
+                 <a class="linka" href="https://www.work.ua/">Service</a>
+                 <a class="linka" href="http://khovansky.info/blog/">Blog</a>
+                <a class="linka" href="https://www.contact-sys.com/">Contact</a>
+                 <a class="linka" href="https://www.contact-sys.com/">Profile</a>
+
+
+            </nav>
+            </div>
+
+        </div>
+
+</div>
+<div class="news">
+    <div class="news_container">
+        <div class="banner_info">
+            <h1 class="banner_up_title">Pharmacy</h1>
+            <h2 class="banner_down_title">Special offer</h2>
+            <h3 class="banner_value">-50%</h3>
+            <div class="btn_more">Buy Now</div>
+
+        </div>
+        <img src="/static/image/pills.png">
+
+    </div>
+</div>
+
+<main>
+    <div class="main_container">
+        <div class="right_container">
+            <div class="categories_container">
+                <div class="category" id="all_category"><span>All Categories</span></div>
+                <div class="category"><span>Medicines</span></div>
+                <div class="category"><span>Medicines</span></div>
+                <div class="category"><span>Medicines</span></div>
+                <div class="category"><span>Medicines</span></div>
+                <div class="category"><span>Medicines</span></div>
+            </div>
+            <div class="latest_deal">
+                <h1 class="title_block">Latest Deals</h1>
+                <div class="product-block" id="latest_deal_product">
+                    <div class="product-container">
+                        <h1><a class="linka" href="https://www.contact-sys.com/">Profile</a> </h1>
+                        <h2><a class="linka" href="https://www.contact-sys.com/">tablet bottle mockup</a> </h2>
+                        <img class="lazy-image" src="https://demo1.leotheme.com/bos_medicor_demo/24-home_default/hummingbird-printed-t-shirt.jpg">
+                        <div class="product-container-inner">
+                            <h3>$28.90</h3>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="article_header">
+                    <div class="product_сatalog">
+
+                        Product catalog</div>
+                    <div class='search'>
+                        <input name="search_input" placeholder="search product" >
+                        <input class="search_btn" type="submit" value="">
+
+                    </div>
+                    <div class="cart">Cart</div>
+        </div>
+        <article class="main_arcticle">
+            <div class="list-container">
+            <div class="product-list">
+                {% for i in range(8) %}
+               <div class="product-block">
+                    <div class="product-container">
+                        <h1><a class="linka" href="https://www.contact-sys.com/">Profile</a> </h1>
+                        <h2><a class="linka" href="https://www.contact-sys.com/">tablet bottle mockup</a> </h2>
+                        <img class="lazy-image" src="https://demo1.leotheme.com/bos_medicor_demo/24-home_default/hummingbird-printed-t-shirt.jpg">
+                        <div class="product-container-inner">
+                            <h3>$28.90</h3>
+                            <button class="cart_button"type="submit" value="add to cart"> </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            </div>
+        </article>
+        <div class="footer-clean">
+            <footer>
+            <div class="container">
+                <div class="row_justify-content-center">
+                    <div class="col-sm-4 col-md-3 item">
+                        <h3>Services</h3>
+                        <ul>
+                            <li><a href="#">Web design</a></li>
+                            <li><a href="#">Development</a></li>
+                            <li><a href="#">Hosting</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-4 col-md-3 item">
+                        <h3>About</h3>
+                        <ul>
+                            <li><a href="#">Company</a></li>
+                            <li><a href="#">Team</a></li>
+                            <li><a href="#">Legacy</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-4 col-md-3 item">
+                        <h3>Careers</h3>
+                        <ul>
+                            <li><a href="#">Job openings</a></li>
+                            <li><a href="#">Employee success</a></li>
+                            <li><a href="#">Benefits</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-3 item social"><a href="#"><i class="icon ion-social-facebook"></i></a><a href="#"><i class="icon ion-social-twitter"></i></a><a href="#"><i class="icon ion-social-snapchat"></i></a><a href="#"><i class="icon ion-social-instagram"></i></a>
+                        <p class="copyright">Company Name © 2018</p>
+                    </div>
+                </div>
+            </div>
+            </footer>
+        </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.bundle.min.js"></script>
+    </div>
+
+</main>
+
+</body>
+</html>

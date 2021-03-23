@@ -1,14 +1,15 @@
 from flask import Flask, request, flash, redirect, url_for, render_template
-import os
-from flask_login import LoginManager
+
 from flask_httpauth import HTTPBasicAuth
-from wtforms import Form, BooleanField, StringField, PasswordField, validators
+from flask_scss import Scss
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from flask_login import UserMixin
 
 
+
 app = Flask(__name__)
+app.debug = True
+Scss(app, static_dir='static', asset_dir='assets')
 
 DB_URL = 'postgresql+psycopg2://{user}:{pw}@{url}/{db}'.format(user='nemo',pw='nasar58n',url='127.0.0.1:5432',db='labpp')
 auth = HTTPBasicAuth()
@@ -81,7 +82,6 @@ class Order(db.Model):
         return '<Order %s %s %s >' % (self.ship_date,self.user_id,self.medicine_id)
 
 
-
-if __name__ == '__main__':
-    app.run(host="0.0.0.0",debug=True)
 import views
+if __name__ == '__main__':
+    app.run(debug=True)

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <link rel="shortcut icon" href="" />
+        <title>Login</title>
+
+        <link rel="stylesheet" type="text/css" href="../static/registration.css">
+    </head>
+<div class="header">
+        <div class="container">
+            <div class="header__inner">
+            <div class="logotyp">.Med</div>
+            <nav class="navigation">
+                 <a class="linka" href="https://www.linkconsulting.com/about-link/">About</a>
+                 <a class="linka" href="https://www.work.ua/">Service</a>
+
+                 <a class="linka" href="http://khovansky.info/blog/">Blog</a>
+                 <a class="linka" href="https://www.contact-sys.com/">Contact</a>
+
+            </nav>
+            </div>
+
+        </div>
+
+</div>
+<form action="/registration" method="POST">
+    <div class='signup'>
+        <div class ="signup_screen">
+            <div class='signup_form'>
+                <h1 class="signup_label">Sign Up</h1>
+                <div class='signup_container'>
+                    <label >Username</label>
+                    <div class='signup_data'>
+                        <input name="name" placeholder="username" >
+                    </div>
+                    <label >Role</label>
+                    <div class='signup_data'>
+                        <input name="role" placeholder="role" >
+                    </div>
+                    <label>Password</label>
+                    <div class='signup_data'>
+                        <input name="password" placeholder="password">
+                    </div>
+                    <label>Confirm password</label>
+                    <div class='signup_data'>
+                        <input name="confirm_password" placeholder="confirm_password">
+                    </div>
+                    <div class='signup_data'>
+                        <input type="submit" class="btn" value="Submit">
+                    </div>
+                    <a class="linka" id="sign_link" href="http://khovansky.info/blog/">
+                        <div class="cancel_btn" ><p>Cancel</p></div>
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</form>
+</html>

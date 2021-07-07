@@ -1,44 +1,72 @@
-from flask import request, jsonify, flash, redirect, url_for
+from datetime import datetime
+
+from flask import request, jsonify, flash, redirect, url_for, g
 from flask_login import login_user, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app import app, login_manager
+from app import app, login_manager, auth
 import models
+from functools import wraps
+def required_params(required):
+
+    def decorator(fn):
+
+
+
+        @wraps(fn)
+
+        def wrapper(*args, **kwargs):
+
+            _json = request.get_json()
+
+            missing = [r for r in required.keys()
+
+                       if r not in _json]
+
+            if missing:
+
+                response = {
+
+                    "status": "error",
+
+                    "message": "Request JSON is missing some required params",
+
+                    "missing": missing
+
+                }
+
+                return jsonify(response), 400
+
+            wrong_types = [r for r in required.keys()
+
+                           if not isinstance(_json[r], required[r])]
+
+            if wrong_types:
+
+                response = {
+
+                    "status": "error",
+
+                    "message": "Data types in the request JSON doesn't match the required format",
+
+                    "param_types": {k: str(v) for k, v in required.items()}
+
+                }
+
+                return jsonify(response), 400
+
+            return fn(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 @login_manager.user_loader
 def load_user(user_id):
     return models.db.session.query(models.User).get(user_id)
 
-@app.route('/user', methods=['GET', 'POST']) #allow both GET and POST requests
-def register_form():
-    if request.method == 'POST':  #this block is only entered when the form is submitted
-        username = request.form.get('username')
-        first_name = request.form['first_name']
-        email = request.form['email']
-        password = request.form['password']
-        phone = request.form['phone']
-        user = models.User.query.filter_by(username=username).first()
-        if user:
-            return "this user already registered"
-        else:
-            user = models.User(username, first_name, email, generate_password_hash(password), phone)
-            try:
-                models.db.session.add(user)
-                models.db.session.commit()
-            except Exception:
-                models.db.session.rollback()
-                return "problem with database", 404
-        return "registered"
 
-    return '''<form method="POST">
-                  username: <input type="text" name="username"><br>
-                  first_name: <input type="text" name="first_name"><br>
-                  email: <input type="text" name="email"><br>
-                  password: <input type="text" name="password"><br>
-                  phone: <input type="text" name="phone"><br>
-                  <input type="submit" value="Submit"><br>
-                    
-              </form>'''
 @app.route('/user/<username>', methods=['DELETE'])
+@auth.login_required(role=['admin'])
 def delete_user_form(username):
     try:
         user=models.User.query.filter_by(username=username).first()
@@ -51,7 +79,15 @@ def delete_user_form(username):
         models.db.session.rollback()
         return "invalid username",400
     return "deleted",200
+
 @app.route('/user', methods=['POST']) #GET requests will be blocked
+@required_params({
+    "username":str,
+    "first_name":str,
+    "email":str,
+    "password":str,
+    "phone":str
+})
 def add_user():
     req_data = request.get_json()
 
@@ -72,21 +108,36 @@ def add_user():
             models.db.session.rollback()
             return "problem with database", 404
     return "registered"
+@app.route('/user/<username>', methods=['GET'])
+@auth.login_required(role=['user','admin'])
+def get_user_by_name(username):
+    try:
+        user = models.User.query.filter_by(username=username).first()
+        if user is None:
+            return "user not found",404
+        return jsonify(user.id,user.first_name,user.phone,user.email),200
+
+    except Exception:
+        return "invalid username",400
 
 @app.route('/medicine', methods=['POST'])
+@required_params({
+    "name":str,
+    "price":int,
+    "number":int,
+    "photo_url":str,
+    "description":str
+})
+@auth.login_required(role=['admin'])
 def add_med():
     try:
         req_data = request.get_json()
-        name=req_data['name']
-        price=int(req_data['price'])
-        number=int(req_data['number'])
-        photo_url=req_data['url']
-        description=req_data['description']
-        med=models.Med.query.filter_by(name=name).first()
+        med=models.Med.query.filter_by(name=req_data['name']).first()
         if med:
             return "this med already registered"
         else:
-            med=models.Med(name,price,number,photo_url,description)
+
+            med = models.Med(**req_data)
             try:
                 models.db.session.add(med)
                 models.db.session.commit()
@@ -97,7 +148,28 @@ def add_med():
         return "invalid data",400
 
     return "added" ,200
+@app.route('/medicine', methods=['PUT'])
+@auth.login_required(role=['admin'])
+def update_medicine():
+    try:
+        req_data = request.get_json()
+        med = models.Med.query.filter_by(id=req_data['id']).first()
+        if med is None:
+            return "med not found", 404
+        try:
+            models.Med.query.filter_by(id=req_data['id']).update(dict(req_data['data']))
+            models.db.session.commit()
+        except Exception:
+            models.db.session.rollback()
+            return "invalid data",400
+        return "updated",200
+    except Exception:
+        return "invalid data",400
+
+
+
 @app.route('/medicine/<medicineId>', methods=['GET'])
+
 def get_medicine_by_id(medicineId):
     try:
         med = models.Med.query.filter_by(id=medicineId).first()
@@ -109,6 +181,7 @@ def get_medicine_by_id(medicineId):
         return "invalid medicine id",400
 
 @app.route('/medicine/<medicineId>', methods=['DELETE'])
+@auth.login_required(role=['admin'])
 def delete_medicine_by_id(medicineId):
     try:
         models.Med.query.filter(models.Med.id==medicineId).delete()
@@ -118,6 +191,28 @@ def delete_medicine_by_id(medicineId):
     except Exception:
         models.db.session.rollback()
         return "invalid medicine id", 400
+
+
+@app.route('/store/order', methods=['POST','GET'])
+@auth.login_required(role=['user','admin'])
+@required_params({
+    "user_id":int,
+    "medicine_id":int
+})
+def add_order():
+    try:
+        req_data = request.get_json()
+        try:
+            order=models.Order(**req_data,ship_date=datetime.today())
+            models.db.session.add(order)
+            models.db.session.commit()
+        except Exception:
+            models.db.session.rollback()
+            return "problem with database", 404
+        return "added order",200
+    except Exception:
+        return "invalid data",400
+"""""
 @app.route('/user/login', methods=['POST','GET'])
 def login():
     try:
@@ -129,20 +224,39 @@ def login():
             return "user,not found"
         else:
             if  check_password_hash(user.password,password):
-                login_user(user, remember=req_data)
+                login_user(user)
                 return "login",200
             else:
                 return "wrong password"
 
     except Exception:
         return "invalid data", 400
+"""""
+@auth.get_user_roles
+def get_user_roles(aut_user):
+    user = models.User.query.filter_by(username=aut_user).first()
+    return user.roles
 
-@app.route('/logout/')
-#@login_required
+@auth.verify_password
+def verify_password(username, password):
+    user = models.User.query.filter_by(username=username).first()
+    if user and \
+            check_password_hash(user.password, password):
+        return username
+
+@app.route('/user/login')
+@auth.login_required(role=['user','admin'])
+def index():
+    return "Hello, %s!" % auth.current_user()
+@app.route('/logout')
+@auth.login_required(role=['user','admin'])
 def logout():
-    logout_user()
 
-    return redirect(url_for('login'))
+    return redirect("http://none:none@127.0.0.1:5000")
+
+if __name__ == '__main__':
+    app.run()
+
 
 
 
